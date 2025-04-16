@@ -1,6 +1,6 @@
 /******************************************************************
  *
- *   ADD YOUR NAME / SECTION NUMBER HERE
+ *   Larry Gao / COMP 400C 002 SP25
  *
  *   This java file contains the problem solutions of canFinish and
  *   numGroups methods.
@@ -72,19 +72,48 @@ class ProblemSolutions {
      * @return boolean          - True if all exams can be taken, else false.
      */
 
-    public boolean canFinish(int numExams, 
-                             int[][] prerequisites) {
+    public boolean canFinish(int numExams, int[][] prerequisites) {
       
         int numNodes = numExams;  // # of nodes in graph
 
         // Build directed graph's adjacency list
-        ArrayList<Integer>[] adj = getAdjList(numExams, 
-                                        prerequisites); 
+        ArrayList<Integer>[] adj = getAdjList(numExams, prerequisites); 
 
         // ADD YOUR CODE HERE - ADD YOUR NAME / SECTION AT TOP OF FILE
-        return false;
 
-    }
+        // create an array to keep track of visitation state of each node
+        // 0 = unvisited, 1 = visiting, 2 = visited
+        int[] state = new int[numNodes];
+
+        // check for cycles using DFS traversal
+        for (int i = 0; i < numNodes; i++) {
+            if (hasCycle(i, adj, state)) {
+                return false; // cycle detected, cannot finish all exams
+            }
+        }
+        return true; // no cycle detected, all exams can be finished
+    } // end method canFinish
+
+    // helper method to detect cycle using DFS
+    private boolean hasCycle(int node, ArrayList<Integer>[] adj, int[] state) {
+        if (state[node] == 1) {
+            return true; // node is being visited again during DFS - cycle detected
+        }
+        if (state[node] == 2) {
+            return false; // node has already been processed, no cycle from this path
+        }
+
+        state[node] = 1; // mark node as visiting
+
+        for (int neighbor : adj[node]) {
+            if (hasCycle(neighbor, adj, state)) {
+                return true; // if a cycle is detected in a neighbor, return true
+            }
+        }
+
+        state[node] = 2; // mark node as visited
+        return false;
+    } // end method hasCycle
 
 
     /**
@@ -101,8 +130,7 @@ class ProblemSolutions {
     private ArrayList<Integer>[] getAdjList(
             int numNodes, int[][] edges) {
 
-        ArrayList<Integer>[] adj 
-                    = new ArrayList[numNodes];      // Create an array of ArrayList ADT
+        ArrayList<Integer>[] adj = new ArrayList[numNodes];      // Create an array of ArrayList ADT
 
         for (int node = 0; node < numNodes; node++){
             adj[node] = new ArrayList<Integer>();   // Allocate empty ArrayList per node
@@ -192,7 +220,34 @@ class ProblemSolutions {
 
         // YOUR CODE GOES HERE - you can add helper methods, you do not need
         // to put all code in this method.
-        return -1;
-    }
 
-}
+        boolean[] visited = new boolean[numNodes];
+        int groups = 0;
+
+        // traverse each node
+        for (int k = 0; k < numNodes; k++) {
+            if (!visited[k]) {
+                dfs(k, graph, visited);
+                groups++; // each DFS from an unvisited node means a new group
+            }
+        }
+
+        return groups;
+    } // end methods numGroups
+
+    // helper mehod to perform DFS traversal and mark all reachable nodes
+    private void dfs(int node, Map<Integer, List<Integer>> graph, boolean[] visited) {
+        visited[node] = true;
+
+        // if node has no connections, skip
+        if (!graph.containsKey(node)) {
+            return;
+        }
+        
+        for (int neighbor : graph.get(node)) {
+            if (!visited[neighbor]) {
+                dfs(neighbor, graph, visited);
+            }
+        }
+    } // end method dfs
+} // end class ProblemSolutions
